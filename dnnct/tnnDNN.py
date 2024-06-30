@@ -563,7 +563,7 @@ class LSTMLayer:
     #     else:
     #         return 0
 
-class MultiHeadAttentionLayerWayu:
+class MultiHeadAttentionLayer:
     def __init__(self, num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias,delta_factor=0.75):
         # assert model_dim % num_heads == 0
         self.num_heads = num_heads#20
@@ -776,6 +776,6 @@ class NNModel:
             # print("q weights shape:", q_weights.shape)
             # print("v weights shape:", v_weights.shape)
             # self.layers.append(MultiHeadAttentionLayer(num_heads, model_dim))
-            self.layers.append(MultiHeadAttentionLayerWayu(num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias, delta_factor=self.delta_factor))
+            self.layers.append(MultiHeadAttentionLayer(num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias, delta_factor=self.delta_factor))
         else:
             raise NotImplementedError()

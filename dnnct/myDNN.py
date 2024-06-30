@@ -541,51 +541,8 @@ def dot_product_attention(Q, K, V, mask=None, scale=True):
     output = [[sum(w * v for w, v in zip(row, col)) for col in zip(*V)] for row in attention_weights]
     return output, attention_weights
 
+
 class MultiHeadAttentionLayer:
-    def __init__(self, num_heads, model_dim=40):
-        assert model_dim % num_heads == 0
-        self.num_heads = num_heads
-        self.model_dim = model_dim
-        self.depth = model_dim // num_heads
-        
-        # Initialize weights to random values
-        self.WQ = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
-        self.WK = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
-        self.WV = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
-        self.WO = [[np.random.rand() for _ in range(model_dim)] for _ in range(num_heads * self.depth)]
-    
-    def split_heads(self, x, batch_size=None):
-        x = [x[i:i + self.depth] for i in range(0, len(x), self.depth)]
-        return [list(x[i::self.num_heads]) for i in range(self.num_heads)]
-    
-    def forward(self, Q, K, V, mask=None):
-        batch_size = len(Q)
-        print("Forward method called with:")
-        print("Q:", Q)
-        print("K:", K)
-        print("V:", V)
-
-
-
-        
-        Q = [self.split_heads(self.matmul(q, self.WQ), batch_size) for q in Q]
-        K = [self.split_heads(self.matmul(k, self.WK), batch_size) for k in K]
-        V = [self.split_heads(self.matmul(v, self.WV), batch_size) for v in V]
-        
-        attention_outputs = [dot_product_attention(q, k, v, None, True) for q, k, v in zip(Q, K, V)]
-        
-        concat_attention = [self.concat_heads(output) for output, _ in attention_outputs]
-        
-        output = [self.matmul(head, self.WO) for head in concat_attention]
-        return output
-    
-    def matmul(self, A, B):
-        return [[sum(a * b for a, b in zip(A_row, B_col)) for B_col in zip(*B)] for A_row in A]
-    
-    def concat_heads(self, heads):
-        return [val for sublist in zip(*heads) for val in sublist]
-
-class MultiHeadAttentionLayerWayu:
     def __init__(self, num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias):
         # assert model_dim % num_heads == 0
         self.num_heads = num_heads#20
@@ -818,6 +775,6 @@ class NNModel:
             # print("q weights shape:", q_weights.shape)
             # print("v weights shape:", v_weights.shape)
             # self.layers.append(MultiHeadAttentionLayer(num_heads, model_dim))
-            self.layers.append(MultiHeadAttentionLayerWayu(num_heads,key_dim_per_heads,wq,bq,wk,bk,wv,bv,output_weights,output_bias))
+            self.layers.append(MultiHeadAttentionLayer(num_heads,key_dim_per_heads,wq,bq,wk,bk,wv,bv,output_weights,output_bias))
         else:
             raise NotImplementedError()
