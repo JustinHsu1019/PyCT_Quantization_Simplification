@@ -334,9 +334,14 @@ class ExplorationEngine:
         input = convert_dict_to_matrix(all_args)
         input = np.expand_dims(input, axis=0)
         cnn_model = load_model(f'model/{self.model_name}.h5')
-        adversarial_predictions = cnn_model.predict(input)
-        adversarial_binary_result = (adversarial_predictions >= 0.5).astype(int)
-        return adversarial_binary_result.tolist()[0][0]
+        if "mnist" in self.model_name.lower():
+            adversarial_predictions = cnn_model.predict(input)
+            adversarial_predicted_class = np.argmax(adversarial_predictions, axis=-1)
+            return adversarial_predicted_class.tolist()[0]
+        elif "imdb" in self.model_name.lower():
+            adversarial_predictions = cnn_model.predict(input)
+            adversarial_binary_result = (adversarial_predictions >= 0.5).astype(int)
+            return adversarial_binary_result.tolist()[0][0]
 
     def _one_execution_concolic(self, all_args, concolic_dict):
         r1, s1 = multiprocessing.Pipe(); r2, s2 = multiprocessing.Pipe(); r3, s3 = multiprocessing.Pipe(); r0, s0 = multiprocessing.Pipe()

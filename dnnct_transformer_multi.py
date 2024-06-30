@@ -4,14 +4,14 @@ import argparse
 
 
 parser = argparse.ArgumentParser(description='Run multi-process attack')
-parser.add_argument('--model_name', type=str, default="transformer_fashion_mnist", help='Name of the model')
-parser.add_argument('--num_process', type=int, default=5, help='Number of processes')
+parser.add_argument('--model_name', type=str, default="transformer_fashion_mnist_two_mha", help='Name of the model')
+parser.add_argument('--num_process', type=int, default=10, help='Number of processes')
 parser.add_argument('--timeout', type=int, default=1000, help='Timeout in seconds')
 parser.add_argument('--delta_factor', type=float, default=0.75, help='Delta factor')
 parser.add_argument('--model_type', type=str, default="tnn", help='Type of the model use cnn or tnn')
-parser.add_argument('--first_n_img', type=int, default=1, help='Number of first images to process')
-
-
+parser.add_argument('--first_n_img', type=int, default=5, help='Number of first images to process')
+#"transformer_fashion_mnist_two_mha"
+# transformer_fashion_mnist
 args = parser.parse_args()
 model_name = args.model_name
 NUM_PROCESS = args.num_process
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # inputs = pyct_lstm_stock_1_2_3_4_8_limit_range02(model_name, first_n_img=502)
     # inputs = stock_shap_1_2_3_4_8_limit_range02(model_name, first_n_img=60)
     # inputs = imdb_transformer_shap_1_2_3_4_8_range02(model_name, first_n_img=5,model_type=model_type)
-    inputs = fashion_mnist_transformer_shap(model_name, first_n_img=first_n_img,model_type=model_type)
+    inputs = fashion_mnist_transformer_shap(model_name, first_n_img=first_n_img,model_type=model_type,delta_factor=delta_factor)
     print("#"*40, f"number of inputs: {len(inputs)}", "#"*45)
     time.sleep(3)
 

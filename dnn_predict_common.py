@@ -10,7 +10,7 @@ def init_model(model_path,model_type="tnn",delta_factor=0.75):
 	global myModel
 	model = keras.models.load_model(model_path)
 	# print(model.summary())
-	layers = [l for l in model.layers if type(l).__name__ not in ['InputLayer','Embedding','Dropout']]
+	layers = [l for l in model.layers if type(l).__name__ not in ['InputLayer','Embedding','Dropout','Reshape']]
 	if model_type == "cnn":
 		myModel = NNModel()
 	elif model_type == "tnn":

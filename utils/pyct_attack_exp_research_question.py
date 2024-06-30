@@ -565,12 +565,12 @@ def sentiment_lstm_lstm_15_1_2_3_4_8_range02(model_name, first_n_img,model_type=
     return inputs
 
 
-def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn"):
+def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn",delta_factor=0.75):
     from utils.dataset import FashionMnistDataset
     fashion_mnist_dataset = FashionMnistDataset()
         
     ### SHAP
-    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/transformer_fashion_mnist_sort_pixel_3d.npy')
+    test_shap_pixel_sorted = np.load(f'./shap_value/{model_name}/{model_name}_sort_pixel_3d.npy')
     
     inputs = []
 
@@ -585,7 +585,7 @@ def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn"):
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"fashion_mnist_test_{idx}",
-                    "exp_name": f"tnn_transoformrt_3600_shap_{ton_n_shap}"
+                    "exp_name": f"tnn_{delta_factor}_transoformrt_3600_shap_{ton_n_shap}"
                 }
                 if model_type=="cnn":
                     save_exp['exp_name']=f"cnn_transoformrt_3600_shap_{ton_n_shap}"
@@ -610,6 +610,8 @@ def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn"):
                 inputs.append(one_input)
                 
     return inputs
+
+
 # def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img):
 #     from utils.dataset import IMDB_Dataset
 #     from utils.gen_random_pixel_location import lstm_imdb_30

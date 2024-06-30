@@ -778,4 +778,5 @@ class NNModel:
             # self.layers.append(MultiHeadAttentionLayer(num_heads, model_dim))
             self.layers.append(MultiHeadAttentionLayer(num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias, delta_factor=self.delta_factor))
         else:
-            raise NotImplementedError()
+            print(f"Unsupported layer type: {type(layer)}")
+            raise NotImplementedError(f"Support for layer type {type(layer)} is not implemented")
