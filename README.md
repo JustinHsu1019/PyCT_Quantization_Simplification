@@ -99,6 +99,21 @@ Total iterations: 2
 ```
 ./dnnct_wrapper.py dnn_example/cnn_simple.h5 dnn_example/img.in
 ```
+To run DNN testing with customizable parameters, use the following command:
+Available options:
+
+- `--model_name`: Name of the model 
+- `--num_process`: Number of processes to use 
+- `--timeout`: Timeout in seconds 
+- `--norm_01`: Use 0-1 normalization 
+- `--delta_factor`: Delta factor for testing 
+- `--model_type`: Type of the model (cnn or tnn)
+- `--first_n_img`: Number of first images to process 
+
+Example usage:
+```
+python dnnct_transformer_multi.py --delta_factor 5
+```
 ## CNN Testing
 ```
 ./dnnct_cnn_multi.py
@@ -111,7 +126,6 @@ Total iterations: 2
 ```
 ./dnnct_transformer_multi.py
 ```
-
 
 ## Evaluation
 

@@ -225,17 +225,18 @@ class ActivationLayer:
         return self._output
 
 class DenseLayer:
-    def __init__(self, weights, bias, shape, activation="None"):
+    def __init__(self, weights, bias, shape, activation="None",delta_factor=0.75):
         self.weights = weights.astype(float)
         self.bias = bias
         self.shape = shape
         self.activation = activation
         self._output = None
+        self.delta_factor = delta_factor
         self._delta = self.delta()
     def delta(self):
         """Calculate delta based on weights."""
         n = self.weights.size
-        delta = (0.5 / n)* np.sum(np.abs(self.weights))
+        delta = (self.delta_factor / n)* np.sum(np.abs(self.weights))
         return delta
     def addActivation(self, activation):
         self.activation = activation
@@ -273,7 +274,7 @@ class DenseLayer:
 
 
 class Conv2DLayer:
-    def __init__(self, weights, bias, shape, activation="None", stride=1, padding='valid'):
+    def __init__(self, weights, bias, shape, activation="None", stride=1, padding='valid',delta_factor=0.75):
         self.weights = weights.astype(float)
         self.shape = shape
         self.bias = bias
@@ -281,11 +282,12 @@ class Conv2DLayer:
         self.stride = stride
         self.activation = activation
         self._output = None
+        self.delta_factor = delta_factor
         self._delta = self.delta()
     def delta(self):
         """Calculate delta based on weights."""
         n = self.weights.size
-        delta = (3 / n) * np.sum(np.abs(self.weights))
+        delta = (self.delta_factor / n) * np.sum(np.abs(self.weights))
         return delta
     def addActivation(self, activation):
         self.activation = activation
@@ -463,8 +465,9 @@ class SimpleRNNLayer:
 
 
 class LSTMLayer:
-    def __init__(self, input_size, weights):
-        self.input_size = input_size                
+    def __init__(self, input_size, weights, delta_factor=0.75):
+        self.input_size = input_size   
+        self.delta_factor = delta_factor             
         W, U, b = (w for w in weights)
         self.hidden_size = int(W.shape[1] / 4)
        
@@ -488,8 +491,7 @@ class LSTMLayer:
 
     def load_weights(self, weights):
         weights = weights.tolist()
-        factor = 0.5
-        delta = (factor / np.size(weights)) * np.sum(np.abs(weights))
+        delta = (self.delta_factor / np.size(weights)) * np.sum(np.abs(weights))
         return weights, delta
        
     def forward(self, X):
@@ -562,9 +564,10 @@ class LSTMLayer:
     #         return 0
 
 class MultiHeadAttentionLayerWayu:
-    def __init__(self, num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias):
+    def __init__(self, num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias,delta_factor=0.75):
         # assert model_dim % num_heads == 0
         self.num_heads = num_heads#20
+        self.delta_factor = delta_factor
         # = model_dim #32
         self.key_dim_per_heads = key_dim_per_heads#32
         self.WQ = wq.numpy().tolist()
@@ -588,8 +591,7 @@ class MultiHeadAttentionLayerWayu:
         else:
             return -input
     def load_delta(self, weights):
-        factor = 0.75
-        delta = (factor / np.size(weights)) * np.sum(np.abs(weights))
+        delta = (self.delta_factor / np.size(weights)) * np.sum(np.abs(weights))
         # aggressive_delta = np.percentile(np.abs(weights), 90)
         # final_delta = max(delta, aggressive_delta)
     
@@ -690,9 +692,10 @@ class MultiHeadAttentionLayerWayu:
         return self.mySum(vector1[i] * vector2[i] for i in range(self.model_dim))
 
 class NNModel:
-    def __init__(self):
+    def __init__(self,delta_factor=0.75):
         self.layers = []
         self.input_shape = None
+        self.delta_factor = delta_factor
 
     def forward(self, tensor_in):
         # tensor_it = tensor_in
@@ -719,7 +722,7 @@ class NNModel:
             biases = layer.get_weights()[1]
             activation = layer.get_config()['activation']
 
-            self.layers.append(Conv2DLayer(weights, biases, weights.shape))
+            self.layers.append(Conv2DLayer(weights, biases, weights.shape, delta_factor=self.delta_factor))
             # print("Add Activation Layer:", activation)
             self.layers.append(ActivationLayer(activation))
         elif type(layer) == Dense:
@@ -729,7 +732,7 @@ class NNModel:
             biases = layer.get_weights()[1]
             activation = layer.get_config()['activation']
 
-            self.layers.append(DenseLayer(weights, biases, weights.shape))
+            self.layers.append(DenseLayer(weights, biases, weights.shape, delta_factor=self.delta_factor))
             # print("Add Activation Layer:", activation)
             self.layers.append(ActivationLayer(activation))
         elif type(layer) == MaxPool2D:
@@ -749,7 +752,7 @@ class NNModel:
             self.layers.append(SimpleRNNLayer(input_dim, weights=layer.get_weights(), activation=activation))
         elif type(layer) == LSTM:
             input_dim = layer.input_shape[-1]
-            self.layers.append(LSTMLayer(input_dim, weights=layer.get_weights()))
+            self.layers.append(LSTMLayer(input_dim, weights=layer.get_weights(), delta_factor=self.delta_factor))
         elif type(layer)== MultiHeadAttention:
             num_heads = layer.get_config()['num_heads']
             # num_heads#20
@@ -773,6 +776,6 @@ class NNModel:
             # print("q weights shape:", q_weights.shape)
             # print("v weights shape:", v_weights.shape)
             # self.layers.append(MultiHeadAttentionLayer(num_heads, model_dim))
-            self.layers.append(MultiHeadAttentionLayerWayu(num_heads,key_dim_per_heads,wq,bq,wk,bk,wv,bv,output_weights,output_bias))
+            self.layers.append(MultiHeadAttentionLayerWayu(num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias, delta_factor=self.delta_factor))
         else:
             raise NotImplementedError()

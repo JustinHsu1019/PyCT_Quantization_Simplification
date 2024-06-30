@@ -6,7 +6,7 @@ import numpy as np
 
 
 myModel = None
-def init_model(model_path,model_type="tnn"):
+def init_model(model_path,model_type="tnn",delta_factor=0.75):
 	global myModel
 	model = keras.models.load_model(model_path)
 	# print(model.summary())
@@ -14,7 +14,7 @@ def init_model(model_path,model_type="tnn"):
 	if model_type == "cnn":
 		myModel = NNModel()
 	elif model_type == "tnn":
-		myModel = tnnNNModel()
+		myModel = tnnNNModel(delta_factor=delta_factor)
 
 	# 1: is because 1st dim of input shape of Keras model is batch size (None)
 	myModel.input_shape = model.input_shape[1:]

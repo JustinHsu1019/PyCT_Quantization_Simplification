@@ -41,15 +41,18 @@ class ExplorationEngine:
 
     def __init__(self, *, solver='cvc4', timeout=20, safety=0, store=None,
                  verbose=1, logfile=None, statsdir=None, smtdir=None, save_dir=None, input_name=None,
-                 module_, execute_, only_first_forward):
+                 module_, execute_, only_first_forward, model_name, matrix_shape):
         global module, execute
 
         module = module_
         execute = execute_
         
+        
         self.save_dir = save_dir
         self.input_name = input_name
         self.only_first_forward = only_first_forward
+        self.model_name = model_name
+        self.matrix_shape = matrix_shape
 
         self.normalize = None
         self.__init2__(); self.statsdir = statsdir
@@ -304,18 +307,33 @@ class ExplorationEngine:
     #     adversarial_predictions = cnn_model.predict(input)
     #     adversarial_predicted_class = np.argmax(adversarial_predictions, axis=-1)
     #     return adversarial_predicted_class.tolist()[0]
+    # def _one_execution_predicted(self, all_args):
+    #     def convert_dict_to_matrix(all_args):
+    #         matrix = np.zeros((500, 32,1))
+    #         for key, value in all_args.items():
+    #             indices = key.split('_')[1:]  # ['0', '0', '0']
+    #             indices = [int(index) for index in indices]
+    #             matrix[indices[0], indices[1]] = value
+    #         return matrix
+    #     input = convert_dict_to_matrix(all_args)
+    #     input = np.expand_dims(input, axis=0)
+    #     model_name="imdb_LSTM_08509"
+    #     cnn_model = load_model('model/'+model_name+'.h5')
+    #     adversarial_predictions = cnn_model.predict(input)
+    #     adversarial_binary_result = (adversarial_predictions >= 0.5).astype(int)
+    #     return adversarial_binary_result.tolist()[0][0]
     def _one_execution_predicted(self, all_args):
         def convert_dict_to_matrix(all_args):
-            matrix = np.zeros((500, 32,1))
+            matrix = np.zeros(self.matrix_shape)
             for key, value in all_args.items():
-                indices = key.split('_')[1:]  # ['0', '0', '0']
+                indices = key.split('_')[1:]
                 indices = [int(index) for index in indices]
-                matrix[indices[0], indices[1]] = value
+                matrix[tuple(indices[:len(self.matrix_shape)])] = value
             return matrix
+        
         input = convert_dict_to_matrix(all_args)
         input = np.expand_dims(input, axis=0)
-        model_name="imdb_LSTM_08509"
-        cnn_model = load_model('model/'+model_name+'.h5')
+        cnn_model = load_model(f'model/{self.model_name}.h5')
         adversarial_predictions = cnn_model.predict(input)
         adversarial_binary_result = (adversarial_predictions >= 0.5).astype(int)
         return adversarial_binary_result.tolist()[0][0]

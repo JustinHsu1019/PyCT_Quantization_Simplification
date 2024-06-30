@@ -10,17 +10,33 @@ from utils.pyct_attack_exp import get_save_dir_from_save_exp
 PYCT_ROOT = './'
 MODEL_ROOT = os.path.join(PYCT_ROOT, 'model')
 
+def get_matrix_shape(model_name):
+    if "mnist" in model_name.lower():
+        return (28, 28, 1)
+    elif "imdb" in model_name.lower():
+        return (500, 32, 1) 
+    else:
+        return None 
+
+def calculate_matrix_shape(in_dict):
+    keys = list(in_dict.keys())
+    if not keys:
+        return None
+    dimensions = [int(dim) for dim in keys[0].split('_')[1:]]
+    max_dims = [max(int(key.split('_')[i+1]) for key in keys) + 1 for i in range(len(dimensions))]
+    return tuple(max_dims)
+
 
 def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" ,save_exp=None,
         max_iter=0, single_timeout=900, timeout=900, total_timeout=900, verbose=1,
-        limit_change_percentage=None, only_first_forward=False):
-
+        limit_change_percentage=None, only_first_forward=False,delta_factor=0.75):
     model_path = os.path.join(MODEL_ROOT, f"{model_name}.h5")
     modpath = os.path.join(PYCT_ROOT, f"dnn_predict_common.py")
     func = "predict"
     funcname = t if (t:=func) else modpath.split('.')[-1]
     save_dir = None
     smtdir = None
+    matrix_shape = get_matrix_shape(model_name)
 
 
     dump_projstats = False
@@ -34,7 +50,8 @@ def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" 
 
     # verbose = 1 # 5:all, 3:>=DEBUG. 2:including SMT, 1: >=INFO
     # norm = True
-
+    if matrix_shape is None:
+        matrix_shape = calculate_matrix_shape(in_dict)
 
     statsdir = None
     if dump_projstats:
@@ -46,7 +63,7 @@ def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" 
     module = get_module_from_rootdir_and_modpath(root, modpath)
     func_init_model = get_function_from_module_and_funcname(module, "init_model")
     execute = get_function_from_module_and_funcname(module, funcname)
-    func_init_model(model_path)
+    func_init_model(model_path, model_type=model_type, delta_factor=delta_factor)
 
     ##############################################################################
     # This section creates an explorer instance and starts our analysis procedure!    
@@ -65,14 +82,15 @@ def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" 
                                             statsdir=statsdir, smtdir=smtdir,
                                             save_dir=save_dir, input_name=save_exp['input_name'],
                                             module_=module, execute_=execute,
-                                            only_first_forward=only_first_forward)
-    elif model_type=="tnn":        
-            engine = libct.tnn_explore.ExplorationEngine(solver='cvc4', timeout=timeout, safety=safety,
-                                                    store=formula, verbose=verbose, logfile=logfile,
-                                                    statsdir=statsdir, smtdir=smtdir,
-                                                    save_dir=save_dir, input_name=save_exp['input_name'],
-                                                    module_=module, execute_=execute,
-                                                    only_first_forward=only_first_forward)
+                                            only_first_forward=only_first_forward,model_name=model_name, matrix_shape=matrix_shape)
+    elif model_type == "tnn":        
+        engine = libct.tnn_explore.ExplorationEngine(solver='cvc4', timeout=timeout, safety=safety,
+                                                store=formula, verbose=verbose, logfile=logfile,
+                                                statsdir=statsdir, smtdir=smtdir,
+                                                save_dir=save_dir, input_name=save_exp['input_name'],
+                                                module_=module, execute_=execute,
+                                                only_first_forward=only_first_forward,
+                                                model_name=model_name, matrix_shape=matrix_shape)
 
 
     result = engine.explore(
