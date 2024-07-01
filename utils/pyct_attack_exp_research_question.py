@@ -580,7 +580,7 @@ def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn",delt
         else:
             s_or_q = "queue"
 
-        for ton_n_shap in [1,2,4,8]:
+        for ton_n_shap in [1,2,4]:
             
             for idx in range(first_n_img):
                 save_exp = {

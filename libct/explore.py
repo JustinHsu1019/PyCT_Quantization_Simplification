@@ -512,9 +512,8 @@ class ExplorationEngine:
 
     def print_coverage(self):
         total_lines, executed_lines, missing_lines = self.coverage_statistics()
-        print("\nLine coverage {}/{} ({:.2%})".format(executed_lines, total_lines, (executed_lines/total_lines) if total_lines > 0 else 0))
+        # print("\nLine coverage {}/{} ({:.2%})".format(executed_lines, total_lines, (executed_lines/total_lines) if total_lines > 0 else 0))
         if missing_lines and self.single_coverage:
-            print("Missing lines:") # only print this info when the scope of coverage is a single file.
+            # print("Missing lines:") # only print this info when the scope of coverage is a single file.
             for file, lines in missing_lines.items():
-                print(f"  {file}: {sorted(lines)}")
-        print("")
+                pass

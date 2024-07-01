@@ -19,7 +19,8 @@ from keras.layers import (
     BatchNormalization,
     SimpleRNN,
     MultiHeadAttention,
-    GlobalAveragePooling1D
+    GlobalAveragePooling1D,
+    Reshape
 )
 
 LAYERS = (
@@ -156,7 +157,6 @@ def actFunc(val, type):
     elif type=='softmax':
         return act_softmax(val)
     elif type=='sigmoid':
-        print("val:",val)
         return act_sigmoid(val)
     elif type=='tanh':
         return act_tanh(val)
@@ -179,8 +179,6 @@ class ActivationLayer:
     def forward(self, tensor_in):
         out_shape = dim(tensor_in)
         tensor_out = tensor_in
-        print(len(out_shape))
-        print(out_shape)
         if len(out_shape)==1:
             # print('start 1: ', self.type, tensor_in)
             if self.type=="softmax":
@@ -541,6 +539,41 @@ def dot_product_attention(Q, K, V, mask=None, scale=True):
     output = [[sum(w * v for w, v in zip(row, col)) for col in zip(*V)] for row in attention_weights]
     return output, attention_weights
 
+class MultiHeadAttentionLayer:
+    def __init__(self, num_heads, model_dim=40):
+        assert model_dim % num_heads == 0
+        self.num_heads = num_heads
+        self.model_dim = model_dim
+        self.depth = model_dim // num_heads
+        
+        # Initialize weights to random values
+        self.WQ = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WK = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WV = [[np.random.rand() for _ in range(model_dim)] for _ in range(model_dim)]
+        self.WO = [[np.random.rand() for _ in range(model_dim)] for _ in range(num_heads * self.depth)]
+    
+    def split_heads(self, x, batch_size=None):
+        x = [x[i:i + self.depth] for i in range(0, len(x), self.depth)]
+        return [list(x[i::self.num_heads]) for i in range(self.num_heads)]
+    
+    def forward(self, Q, K, V, mask=None):
+        batch_size = len(Q)
+        Q = [self.split_heads(self.matmul(q, self.WQ), batch_size) for q in Q]
+        K = [self.split_heads(self.matmul(k, self.WK), batch_size) for k in K]
+        V = [self.split_heads(self.matmul(v, self.WV), batch_size) for v in V]
+        
+        attention_outputs = [dot_product_attention(q, k, v, None, True) for q, k, v in zip(Q, K, V)]
+        
+        concat_attention = [self.concat_heads(output) for output, _ in attention_outputs]
+        
+        output = [self.matmul(head, self.WO) for head in concat_attention]
+        return output
+    
+    def matmul(self, A, B):
+        return [[sum(a * b for a, b in zip(A_row, B_col)) for B_col in zip(*B)] for A_row in A]
+    
+    def concat_heads(self, heads):
+        return [val for sublist in zip(*heads) for val in sublist]
 
 class MultiHeadAttentionLayer:
     def __init__(self, num_heads, key_dim_per_heads, wq, bq, wk, bk, wv, bv, output_weights, output_bias):
@@ -557,7 +590,11 @@ class MultiHeadAttentionLayer:
         self.WO = output_weights.numpy().tolist()
         self.BO = output_bias.numpy().tolist()
     def forward(self, input, mask=None):
-        if dim(input) == 2:
+        if len(np.array(input).shape) == 1:
+            # 如果输入是一维的，我们将其重塑为 (1, input_length)
+            input = np.array(input).reshape(1, -1)
+        
+        if len(np.array(input).shape) == 2:
             return self.forwardSingle(input, mask)
         else:
             return self.forwardBatch(input, mask)
@@ -565,44 +602,17 @@ class MultiHeadAttentionLayer:
     def forwardBatch(self, inputs, mask=None):
         return [self.forwardSingle(input, mask) for input in inputs]
     def forwardSingle(self, input, mask=None):
-        # print("inputs:",np.array(input).shape)
-        
         self.seq_len, self.model_dim = np.array(input).shape
-        #inputs:500*32
-        # 每個input都是一個32維的向量
-        # for input in inputs:
-        #     print("input:",len(input))#32
-        # print('$$$ splitting and transforming Q, K, V')
         Q = self.transform_and_split(input, self.WQ, self.BQ)
         K = self.transform_and_split(input, self.WK, self.BK)
         V = self.transform_and_split(input, self.WV, self.BV)#500,20,32
 
         # print('$$$ calculating attention')
         attentions = [self.dot_product_attention(Q[i], K[i], V[i]) for i in range(self.num_heads)]
-        # assert np.array(attentions).shape == (self.num_heads, self.seq_len, self.key_dim_per_heads)#20,500,32
-        
-        # print('$$$ concatenating and transforming')
         outputs = self.concatenate_and_transform(attentions, self.WO, self.BO)
-        # assert np.array(outputs).shape == (self.seq_len, self.model_dim)#500,32
         return outputs
     
     def transform_and_split(self,sequence_of_vectors, weights, bias):
-        # print("self.WQ:",np.array(self.WQ).shape)#32,20,32
-        # print("self.BQ:",np.array(self.BQ).shape)#20,32
-        # print("self.WO:",np.array(self.WO).shape)#20,32,32
-        # print("self.BO:",np.array(self.BO).shape)#32
-        # assert np.array(sequence_of_vectors).shape == (self.seq_len, self.model_dim)#500,32
-        
-        # assert np.array(weights).shape == (self.model_dim, self.num_heads, self.key_dim_per_heads)#32,20,32
-        # weights = np.transpose(weights, axes=(1, 2, 0))
-        # assert weights.shape == (num_heads, key_dim_per_heads, model_dim)#20,32,32
-        # def mySum(x):
-        #     sum = 0.0
-        #     # print('x:',type(x))
-        #     # print('x[0]:',type(list(x)[0]))
-        #     for i in x:
-        #         sum = sum + i
-        #     return sum
 
         outputs = [
                         [
@@ -634,13 +644,10 @@ class MultiHeadAttentionLayer:
               ]
               for word in range(self.seq_len)
           ]
-        # print('$$$$$ concatenating and transforming line 712')
         assert np.array(outputs).shape == (self.seq_len, self.model_dim)
         return outputs
     def mySum(self,x):
             s = 0.0
-            # print('x:',type(x))
-            # print('x[0]:',type(list(x)[0]))
             for i in x:
                 s = s + i
             return s
@@ -689,6 +696,48 @@ class MultiHeadAttentionLayer:
         return self.mySum(vector1[i] * vector2[i] for i in range(self.model_dim))
 
 
+class ReshapeLayer:
+    def __init__(self, target_shape):
+        self.target_shape = target_shape
+        # print("target_shape:",target_shape)
+        self._output = None
+
+
+    def forward(self, tensor_in):
+        tensor_out = self._reshape(tensor_in, self.target_shape)
+        self._output = tensor_out
+        # print("tensor_out:",np.array(tensor_out).shape)
+        # print("tensor_out:",tensor_out)
+        return tensor_out
+
+
+    def _reshape(self, x, shape):
+        # Flatten the input
+        flat_list = self._flatten(x)
+        # Create an iterator for the flattened list
+        iterator = iter(flat_list)
+        # Recursively build the reshaped list
+        return self._build_shape(iterator, shape)
+
+
+    def _flatten(self, x):
+        if isinstance(x, collections.abc.Iterable) and not isinstance(x, (str, bytes)):
+            flat_list = []
+            for item in x:
+                flat_list.extend(self._flatten(item))
+            return flat_list
+        else:
+            return [x]
+
+
+    def _build_shape(self, iterator, shape):
+        if not shape:
+            return next(iterator)
+        return [self._build_shape(iterator, shape[1:]) for _ in range(shape[0])]
+
+
+    def getOutput(self):
+        return self._output
 
 
 class NNModel:
@@ -752,6 +801,9 @@ class NNModel:
         elif type(layer) == LSTM:
             input_dim = layer.input_shape[-1]
             self.layers.append(LSTMLayer(input_dim, weights=layer.get_weights()))
+        elif type(layer)==Reshape:
+            self.layers.append(ReshapeLayer(layer.target_shape))
+            return 1
         elif type(layer)== MultiHeadAttention:
             num_heads = layer.get_config()['num_heads']
             # num_heads#20

@@ -8,7 +8,7 @@ parser.add_argument('--model_name', type=str, default="transformer_fashion_mnist
 parser.add_argument('--num_process', type=int, default=5, help='Number of processes')
 parser.add_argument('--timeout', type=int, default=3600, help='Timeout in seconds')
 parser.add_argument('--delta_factor', type=float, default=1.5, help='Delta factor')
-parser.add_argument('--model_type', type=str, default="tnn", help='Type of the model use cnn or tnn')
+parser.add_argument('--model_type', type=str, default="cnn", help='Type of the model use cnn or tnn')
 parser.add_argument('--first_n_img', type=int, default=5, help='Number of first images to process')
 #"transformer_fashion_mnist_two_mha"
 # transformer_fashion_mnist

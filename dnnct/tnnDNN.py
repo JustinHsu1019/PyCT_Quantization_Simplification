@@ -19,7 +19,8 @@ from keras.layers import (
     BatchNormalization,
     SimpleRNN,
     MultiHeadAttention,
-    GlobalAveragePooling1D
+    GlobalAveragePooling1D,
+    Reshape
 )
 
 LAYERS = (
@@ -690,7 +691,48 @@ class MultiHeadAttentionLayer:
         return result
     def dot_product(self, vector1, vector2):
         return self.mySum(vector1[i] * vector2[i] for i in range(self.model_dim))
+class ReshapeLayer:
+    def __init__(self, target_shape):
+        self.target_shape = target_shape
+        # print("target_shape:",target_shape)
+        self._output = None
 
+
+    def forward(self, tensor_in):
+        tensor_out = self._reshape(tensor_in, self.target_shape)
+        self._output = tensor_out
+        # print("tensor_out:",np.array(tensor_out).shape)
+        # print("tensor_out:",tensor_out)
+        return tensor_out
+
+
+    def _reshape(self, x, shape):
+        # Flatten the input
+        flat_list = self._flatten(x)
+        # Create an iterator for the flattened list
+        iterator = iter(flat_list)
+        # Recursively build the reshaped list
+        return self._build_shape(iterator, shape)
+
+
+    def _flatten(self, x):
+        if isinstance(x, collections.abc.Iterable) and not isinstance(x, (str, bytes)):
+            flat_list = []
+            for item in x:
+                flat_list.extend(self._flatten(item))
+            return flat_list
+        else:
+            return [x]
+
+
+    def _build_shape(self, iterator, shape):
+        if not shape:
+            return next(iterator)
+        return [self._build_shape(iterator, shape[1:]) for _ in range(shape[0])]
+
+
+    def getOutput(self):
+        return self._output
 class NNModel:
     def __init__(self,delta_factor=0.75):
         self.layers = []
@@ -753,6 +795,9 @@ class NNModel:
         elif type(layer) == LSTM:
             input_dim = layer.input_shape[-1]
             self.layers.append(LSTMLayer(input_dim, weights=layer.get_weights(), delta_factor=self.delta_factor))
+        elif type(layer)==Reshape:
+            self.layers.append(ReshapeLayer(layer.target_shape))
+            return 1
         elif type(layer)== MultiHeadAttention:
             num_heads = layer.get_config()['num_heads']
             # num_heads#20

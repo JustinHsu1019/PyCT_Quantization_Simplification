@@ -82,7 +82,7 @@ def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" 
                                             statsdir=statsdir, smtdir=smtdir,
                                             save_dir=save_dir, input_name=save_exp['input_name'],
                                             module_=module, execute_=execute,
-                                            only_first_forward=only_first_forward,model_name=model_name, matrix_shape=matrix_shape)
+                                            only_first_forward=only_first_forward)
     elif model_type == "tnn":        
         engine = libct.tnn_explore.ExplorationEngine(solver='cvc4', timeout=timeout, safety=safety,
                                                 store=formula, verbose=verbose, logfile=logfile,
