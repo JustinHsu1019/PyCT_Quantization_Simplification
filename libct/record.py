@@ -197,7 +197,6 @@ class ConcolicTestRecorder:
 
         return res
 
-
     def save_stats_dict(self, constraint_complexity=None):
         if self.save_dir:
             if not os.path.exists(self.save_dir):
@@ -206,11 +205,29 @@ class ConcolicTestRecorder:
             with open(os.path.join(self.save_dir, "stats.json"), 'w') as f:
                 stats_dict = self.output_stats_dict()
                 stats_dict['constraint_complexity'] = constraint_complexity
-                # json.dump(stats_dict, f, indent="\t") # 較容易讀懂但浪費儲存空間
-                json.dump(stats_dict, f) # 最節省儲存空間但不容易讀懂
+                serializable_stats = json_serializable(stats_dict)
+                
+                try:
+                    json.dump(serializable_stats, f)
+                except TypeError as e:
+                    print(f"Error during JSON serialization: {e}")
+                    print("Problematic data:")
+                    for key, value in serializable_stats.items():
+                        print(f"{key}: {type(value)}")
             
             img_name = f"adv_{self.original_label}_to_{self.attack_label}.jpg"
             self.save_adversarial_input_as_image(os.path.join(self.save_dir, img_name))
                         
             np.save(os.path.join(self.save_dir, "sat_inputs.npy"), np.array(self.sat_inputs))
 
+def json_serializable(obj):
+    if isinstance(obj, (int, float, str, bool, type(None))):
+        return obj
+    elif isinstance(obj, (list, tuple)):
+        return [json_serializable(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {str(key): json_serializable(value) for key, value in obj.items()}
+    elif hasattr(obj, '__dict__'):
+        return json_serializable(obj.__dict__)
+    else:
+        return str(obj)

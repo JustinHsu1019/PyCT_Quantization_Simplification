@@ -280,12 +280,11 @@ class ExplorationEngine:
             s = (self.module_lines_range - self.deadcode) & self.coverage_accumulated_missing_lines[self.target_file]
         else:
             s = (self.function_lines_range - self.deadcode) & self.coverage_accumulated_missing_lines[self.target_file]
-        log.info(f"Not Covered Yet: {self.target_file} {sorted(s) if s else '{}'}")
         if self.previous_result != None and self.previous_result != origin_result:
             print('#'*60)
             print(f'[Result Change]: self.previous_result : {self.previous_result}!= result : {origin_result}')
             print('#'*60)
-            recorder.find_adversarial_input(all_args, result)
+            recorder.find_adversarial_input(all_args, origin_result)
             return False
         self.previous_result = origin_result
         print(f'[Result Not Change]: self.previous_result : {self.previous_result}== result : {origin_result}')
@@ -371,10 +370,11 @@ class ExplorationEngine:
                     with open(self.statsdir + '/exception.txt', 'a') as f:
                         print(f"Timeout (soft) for: {all_args} >> ./pyct.py -r '{self.root}' '{self.modpath}' -s {self.funcname} {{}} --lib '{self.lib}' --include_exception", file=f)
             except Exception as e:
-                log.error(f"Exception for:  >> ./pyct '{self.root}' '{self.modpath}' -s {self.funcname} {{}} -m 20 --lib '{self.lib}' --include_exception"); #log.error(e); traceback.print_exc()
+                # log.error(f"Exception for:  >> ./pyct '{self.root}' '{self.modpath}' -s {self.funcname} {{}} -m 20 --lib '{self.lib}' --include_exception"); #log.error(e); traceback.print_exc()
                 if self.statsdir:
                     with open(self.statsdir + '/exception.txt', 'a') as f:
-                        print(f"Exception for: {all_args} >> ./pyct '{self.root}' '{self.modpath}' -s {self.funcname} {{}} -m 20 --lib '{self.lib}' --include_exception", file=f); print(e, file=f)
+                        #print(f"Exception for: {all_args} >> ./pyct '{self.root}' '{self.modpath}' -s {self.funcname} {{}} -m 20 --lib '{self.lib}' --include_exception", file=f); print(e, file=f)
+                        pass
             ###################################### Communication Section ######################################
             s0.send(0) # just a notification to the parent process that we're going to send data
             try: s2.send(result)

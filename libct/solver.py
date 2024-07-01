@@ -125,7 +125,7 @@ class Solver:
             
         print(status)
         ##########################################################################################
-        log.smtlib2(f"SMT-id: {Solver.cnt}／Status: {status}／Model: {model}")
+        # log.smtlib2(f"SMT-id: {Solver.cnt}／Status: {status}／Model: {model}")
         Solver.cnt += 1
         Solver.iter_count += 1
         return model
