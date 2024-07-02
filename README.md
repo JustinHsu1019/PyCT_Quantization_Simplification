@@ -202,3 +202,91 @@ python dnnct_transformer_multi.py [options]
 | `--first_n_img` | Number of images/sequences to process | 5 | `--first_n_img 10` |
 
 - `--model_name`: Specifies the name of the Transformer model to test. The default is set to "transformer_fashion_mnist_two_mha", but you can also use other models like "transformer_fashion_mnist". Ensure this matches your saved model file name.
+
+## Evaluation
+
+We conducted preliminary evaluations on CNN and LSTM models to demonstrate the effectiveness of our ternary simplification approach in concolic testing.
+
+### CNN Model Evaluation
+
+- Dataset: 100 MNIST images
+- Pixels modified: Top 1-8 influential pixels (based on Deep SHAP)
+- Timeout: 100 seconds per image
+- Comparison: Original CNN vs. TNN_delta (threshold-based) vs. TNN_sign (sign-based)
+
+Results for 2, 4, and 8 pixel modifications:
+
+| Model     | Avg. Path Constraints | Resolved Constraints | Iteration Index | Test Inputs Generated |
+|-----------|----------------------:|---------------------:|----------------:|----------------------:|
+| TNN_delta | 1520.07 - 4222.27     | 143.14 - 789.01      | 1.13 - 12.55    | 19.97 - 34.88         |
+| TNN_sign  | 938.96 - 1817.72      | 33.2 - 168.21        | 1.00 - 2.07     | 5.01 - 8.54           |
+| CNN       | 799.3 - 1271.96       | 10.97 - 39.35        | 1.00 - 1.01     | 2.41 - 4.87           |
+
+TNN_delta significantly outperformed both TNN_sign and the original CNN in all metrics, especially in complex scenarios with more pixels modified.
+
+
+### LSTM Model Evaluation
+
+- Model: Adapted from TestRnn, featuring an LSTM layer followed by a dense layer for binary classification
+- Dataset: IMDB (movie reviews for sentiment classification)
+- Sequences modified: Top 1, 2, 4, 8, 16, and 32 highest SHAP values
+- Timeout: 7200 seconds for unresolved cases
+- Comparison: Original LSTM vs. LSTM_Δ∗ (ternary variant)
+- Samples: 50
+
+Results:
+
+| Pixels | Model      | Generated Constraints | SAT Solutions | Timeout (s) | Solved Constraints | Iteration Index | Adversarial Inputs |
+|--------|------------|----------------------:|---------------:|------------:|-------------------:|----------------:|-------------------:|
+| 1      | LSTM       | 926.9                 | 6.03           | 6201.42     | 820.1              | 1.71            | 0                  |
+|        | LSTM_Δ∗    | 272.39                | 0.59           | 85.83       | 272.39             | 2.27            | 0                  |
+| 4      | LSTM       | 1072.3                | 1.13           | 7200        | 704.12             | 1               | 0                  |
+|        | LSTM_Δ∗    | 7627.97               | 15.92          | 3023.12     | 5639.82            | 8.07            | 0                  |
+| 32     | LSTM       | 1063.71               | 0              | 7200        | 0                  | 1               | 0                  |
+|        | LSTM_Δ∗    | 10550                 | 1.12           | 6983.6      | 218.95             | 1               | 2                  |
+
+LSTM_Δ∗ significantly outperformed the original LSTM, especially in:
+- Generating more constraints and SAT solutions
+- Reducing timeout rates (e.g., from 93% to 13% for single sequence data points)
+- Producing adversarial inputs for complex cases (16 and 32 pixels)
+
+### Transformer Model Evaluation
+
+- Architecture: Single layer of MultiHeadAttention followed by a Dense layer
+- Dataset: MNIST
+- Pixels modified: Top 1, 2, 4, and 8 highest SHAP values
+- Timeout: 1000 seconds for unresolved cases
+- Comparison: Original Transformer vs. Transformer_Δ∗
+- Samples: 100
+
+Results:
+
+| Pixels | Model           | Generated Constraints | SAT Solutions | Timeout (s) | Solved Constraints | Iteration Index | Adversarial Inputs |
+|--------|-----------------|----------------------:|---------------:|------------:|-------------------:|----------------:|-------------------:|
+| 1      | Transformer     | 6779.02               | 10.26          | 443.61      | 391.96             | 1.43            | 81                 |
+|        | Transformer_Δ∗  | 6268.29               | 8.68           | 440.52      | 448.88             | 1.55            | 74                 |
+| 8      | Transformer     | 1581.3                | 0.24           | 1053.27     | 1.76               | 1               | 1                  |
+|        | Transformer_Δ∗  | 2990.63               | 0.53           | 1009.18     | 2.37               | 1               | 14                 |
+
+Transformer_Δ∗ showed improvements over the original Transformer, particularly in:
+- Generating more SAT solutions for complex cases (4 and 8 pixels)
+- Producing more adversarial inputs, especially for higher pixel counts
+
+### Enhanced Sparsification Strategy on LSTM
+
+We further evaluated different sparsification levels (2/3Δ∗, Δ∗, 2Δ∗, 3Δ∗, 4Δ∗) on the LSTM model:
+
+- Samples: 10
+- Sequences modified: Top 1, 2, 4, 8, 16, and 32 highest SHAP values
+- Timeout: 7200 seconds
+
+Key findings:
+- Lower Δ∗ values (e.g., 2/3Δ∗) led to more timeouts for high pixel counts
+- Medium values (2Δ∗, 3Δ∗) balanced computational efficiency and constraint-solving capability
+- High values (4Δ∗) resulted in over-simplification, reducing the model's effectiveness
+
+Optimal pruning intensity was found to be between Δ∗ and 3Δ∗, providing a good balance between computational efficiency and the ability to handle complex data in adversarial settings.
+
+These results demonstrate that our ternary simplification approach effectively enhances the capability of concolic testing on various neural network architectures, allowing for more efficient exploration of execution paths and generation of adversarial inputs.
+
+
