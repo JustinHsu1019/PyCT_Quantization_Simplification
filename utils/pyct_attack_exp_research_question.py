@@ -277,7 +277,7 @@ def stock_random_1_2_3_4_8_range02(model_name, first_n_img):
                 
     return inputs
 
-def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
+def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="qnn"):
     from utils.dataset import IMDB_Dataset
     from utils.gen_random_pixel_location import lstm_imdb_30
     
@@ -293,9 +293,9 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
         else:
             s_or_q = "queue"
 
-        for ton_n in [16,32]:
+        # for ton_n in [16,32]:
 
-        # for ton_n in [1,2,4,8]:
+        for ton_n in [1,2,4,8]:
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"imdb_test_{idx}",
@@ -303,7 +303,7 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="cnn"):
                     # "only_first_forward":True
                     # "save_smt": True
                 }
-                if model_type=="cnn":
+                if model_type=="origin":
                     save_exp['exp_name']=f"lstm_limit_{limit_p}/shap_{ton_n}"
 
                 save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
@@ -565,7 +565,7 @@ def sentiment_lstm_lstm_15_1_2_3_4_8_range02(model_name, first_n_img,model_type=
     return inputs
 
 
-def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn",delta_factor=0.75):
+def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="qnn",delta_factor=0.75):
     from utils.dataset import FashionMnistDataset
     fashion_mnist_dataset = FashionMnistDataset()
         
@@ -587,8 +587,8 @@ def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="tnn",delt
                     "input_name": f"fashion_mnist_test_{idx}",
                     "exp_name": f"tnn_{delta_factor}_transoformrt_3600_shap_{ton_n_shap}"
                 }
-                if model_type=="cnn":
-                    save_exp['exp_name']=f"cnn_transoformrt_3600_shap_{ton_n_shap}"
+                if model_type=="origin":
+                    save_exp['exp_name']=f"origin_transoformrt_3600_shap_{ton_n_shap}"
 
                 save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
                 if os.path.exists(save_dir):

@@ -14,7 +14,7 @@ def get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=
     return save_dir
 
 
-def run_multi_attack_subprocess_wall_timeout(args, timeout, norm,model_type="tnn",delta_factor=0.75):
+def run_multi_attack_subprocess_wall_timeout(args, timeout, norm,model_type="qnn",delta_factor=0.75):
     import run_dnnct
     
     for one_input in args:

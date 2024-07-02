@@ -95,107 +95,110 @@ Total iterations: 2
 ---
 
 
-## DNN Testing
+## Quantization Testing
 ```
 ./dnnct_wrapper.py dnn_example/cnn_simple.h5 dnn_example/img.in
 ```
 To run DNN testing with customizable parameters, use the following command:
 Available options:
 
-- `--model_name`: Name of the model 
-- `--num_process`: Number of processes to use 
-- `--timeout`: Timeout in seconds 
-- `--norm_01`: Use 0-1 normalization 
-- `--delta_factor`: Delta factor for testing 
-- `--model_type`: Type of the model (cnn or tnn)
-- `--first_n_img`: Number of first images to process 
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `--model_name` | Name of the model to test | `--model_name mnist_lstm_09785` |
+| `--num_process` | Number of parallel processes | `--num_process 8` |
+| `--timeout` | Timeout for each test in seconds | `--timeout 3600` |
+| `--delta_factor` | Factor for adjusting test sensitivity |  `--delta_factor 0.75` |
+| `--model_type` | Model type, either "origin" or "qnn" | `--model_type qnn` |
+| `--first_n_img` | Number of images to process | `--first_n_img 10` |
 
-Example usage:
+### Detailed Parameter Descriptions
+
+- `--model_name`: Specifies the name of the deep learning model to test. This should correspond to your saved model file name.
+
+- `--num_process`: Sets the number of parallel processes to run. Increasing this value can speed up testing but will also increase system resource usage.
+
+- `--timeout`: Maximum runtime for each individual test. If a test exceeds this time, it will be terminated.
+
+- `--delta_factor`: his parameter adjusts the sensitivity of the test. Lower values make the test more sensitive, potentially finding more edge cases but may increase false positives. Higher values do the opposite. **Important:** This parameter is only effective when `--model_type` is set to "qnn". For "origin" model type, this parameter has no effect.
+
+- `--model_type`: This parameter specifies the type of model, which is particularly important for quantization testing:
+  - "origin": Indicates the original floating-point model.
+  - "qnn": Indicates a Quantized Neural Network. These models use integer or fixed-point arithmetic to reduce computational requirements.
+  
+  Choosing "qnn" activates specific quantization-related testing procedures, which may include checking quantization errors, testing quantization boundary conditions, etc.
+
+- `--first_n_img`: Specifies the number of images to process. This is useful for limiting the scope of testing or for quick preliminary tests.
+
+### Usage Example
+
+```bash
+python dnnct_transformer_multi.py --model_name transformer_fashion_mnist
+ --num_process 5 --timeout 1000 --delta_factor 0.75 --model_type qnn --first_n_img 10
 ```
-python dnnct_transformer_multi.py --delta_factor 5
-```
+
+This command will:
+- Use the "transformer_fashion_mnist" model
+- Run 5 parallel processes
+- Set a timeout of 1000 seconds
+- Set the delta_factor to 0.75
+- Use the Quantized Neural Network (QNNs) mode
+- Process the first 10 images
+
 ## CNN Testing
+
+To run CNN-specific testing with customizable parameters, use the following command:
+
+```bash
+python dnnct_cnn_multi.py [options]
 ```
-./dnnct_cnn_multi.py
-```
+
+### Available Options
+
+| Parameter | Description | Default | Example |
+|-----------|-------------|---------|---------|
+| `--model_name` | Name of the CNN model to test | "mnist_sep_act_m6_9628" | `--model_name custom_cnn_model` |
+| `--num_process` | Number of parallel processes | 5 | `--num_process 8` |
+| `--timeout` | Timeout for each test in seconds | 100 | `--timeout 300` |
+| `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
+| `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
+| `--first_n_img` | Number of images to process | 1 | `--first_n_img 10` |
+
 ## LSTM Testing
+
+To run LSTM-specific testing with customizable parameters, use the following command:
+
+```bash
+python dnnct_rnn_multi.py [options]
 ```
-./dnnct_rnn_multi.py
-```
+
+### Available Options
+
+| Parameter | Description | Default | Example |
+|-----------|-------------|---------|---------|
+| `--model_name` | Name of the LSTM model to test | "imdb_LSTM_08509" | `--model_name custom_lstm_model` |
+| `--num_process` | Number of parallel processes | 5 | `--num_process 8` |
+| `--timeout` | Timeout for each test in seconds | 7200 | `--timeout 3600` |
+| `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
+| `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
+| `--first_n_img` | Number of sequences to process | 1 | `--first_n_img 10` |
+
 ## Transformer Testing
+
+To run Transformer-specific testing with customizable parameters, use the following command:
+
+```bash
+python dnnct_transformer_multi.py [options]
 ```
-./dnnct_transformer_multi.py
-```
 
-## Evaluation
+### Available Options
 
+| Parameter | Description | Default | Example |
+|-----------|-------------|---------|---------|
+| `--model_name` | Name of the Transformer model to test | "transformer_fashion_mnist_two_mha" | `--model_name custom_transformer` |
+| `--num_process` | Number of parallel processes | 5 | `--num_process 8` |
+| `--timeout` | Timeout for each test in seconds | 3600 | `--timeout 7200` |
+| `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
+| `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
+| `--first_n_img` | Number of images/sequences to process | 5 | `--first_n_img 10` |
 
-The following instructions can be used to reproduce Table 3 in the paper #76 of APLAS 2021. For the sake of convenience, we recommend to conduct the experiment in the provided docker image `docker pull alan23273850/pyct`. In this image, all statistics are already prepared except `./root/PyCT/project_statistics`, `./root/PyCT/project_statistics_disable_AST`, `./root/PyExZ3/project_statistics`, `./root/PyExZ3/project_statistics_disable_AST` in order to minimize its size. Please note that these folders contain no csv files, so never mind. To start a new container from the image, type `docker run -it --entrypoint bash [image id]`. To get into an existing container, type `docker start -ai [container id]`. To leave a container simply type `exit`.
-
-
-* Navigate to `/root/PyExZ3` and run the following three set of experiments with the virtual environment enabled (`pipenv shell` ... `exit`).
-    1. Run `./integration_test_pyct.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    2. Run `./integration_test_pyexz3.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    3. Run `./run_project.py 2 ../04_Python` first and then `./measure_coverage.py 2 ../04_Python`.
-
-
-* Since our tool `/root/PyCT` cannot be switched to disable AST rewriting from input options, one must manually comment out line `180-183` and `202` of `/root/PyCT/libct/wrapper.py` first. Then navigate to `/root/PyCT` and run the following three set of experiments with the virtual environment enabled (`pipenv shell` ... `exit`).
-
-
-    1. Run `./integration_test_pyct.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    2. Run `./integration_test_pyexz3.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    3. Run `./run_project.py 1 ../04_Python` first and then `./measure_coverage.py 1 ../04_Python`.
-
-
-  After this series of commands, please `mv paper_statistics paper_statistics_disable_AST`, and `git restore libct/wrapper.py`. If you want to preserve `project_statistics`, also do `mv project_statistics project_statistics_disable_AST`.
-
-
-* Stay in `/root/PyCT` and run the following three set of experiments with the virtual environment enabled (`pipenv shell` ... `exit`).
-    1. Run `./integration_test_pyct.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    2. Run `./integration_test_pyexz3.py -n 8`, where `8` can be adjusted to any number of runnable threads.
-    3. Run `./run_project.py 1 ../04_Python` first and then `./measure_coverage.py 1 ../04_Python`.
-
-
-Finally `./produce_paper_statistics.py` and the output `./paper_total_table.csv` is what we want. The bottleneck of the elapsed time is `/root/04_Python` and it takes almost 2 to 3 days to complete the whole task.
-
-
-<!-- 
----
-
-
-## TODO
-
-
----
-
-
-## Known Issues
-
-
-Although this project aims to provide an error-free concolic testing environment, this goal in fact can be proven almost impossible! The most significant obstacle is "exact type checking." When a program performs this kind of checking, it probably wants to do something that only accepts primitive types. However, whether to unwrap the concolic objects automatically when facing this check solely depends on the purpose of the code, and of course the purpose can not be recognized by softwares nowadays. Besides, we've not come up with a method to unwrap these arguments if they are immutable objects and enclosed in another function. For example, the C source code of socket implementations expects the input arguments to be primitive. In this case we can replace the Python-level socket function with our custom one which unwraps the arguments first. As another example, some network libraries may need to know whether the object to be sent is primitive or not, so that it can decide whether to run the operations designed specifically for non-primitive objects. In this case we should not unwrap the concolic objects automatically. Currently we can only manually adjust the code case by case.
-
-
-1. To replace an existing function with your custom one, you can refer to the `prepare()` function in `conbyte/explore.py`.
-
-
-2. To disable wrapping a module when importing it, you can refer to line 144 in `conbyte/wrapper.py`.
-
-
----
-
-
-## How to Contribute
-
-
-blablabla...
-
-
-Finally you may want to run the (parallel) integration test (in `integration_test.py`) to ensure the contribution is correct. The command is `pytest integration_test.py --workers [# of processes] -x`, and it takes almost 11 minutes to run.
-
-
-If you want to create the csv file of the testing result, run `echo "ID|Line Coverage|Missing Lines|Inputs & Outputs" > output.csv2 && dump=True pytest integration_test.py --workers [# of processes] -x && cp /dev/null output.csv && cat *.csv >> output.csv2 && rm -f *.csv && mv output.csv2 output.csv`. Make sure there are no existing *.csv files in the current directory before running the test. Our file content is separated by "|" since "," is already contained in the data. -->
-
-
-
-
-
+- `--model_name`: Specifies the name of the Transformer model to test. The default is set to "transformer_fashion_mnist_two_mha", but you can also use other models like "transformer_fashion_mnist". Ensure this matches your saved model file name.

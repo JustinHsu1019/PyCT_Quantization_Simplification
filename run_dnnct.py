@@ -76,14 +76,14 @@ def run(model_name, in_dict, con_dict, norm, solve_order_stack,model_type="cnn" 
         
         if save_exp.get('save_smt', False):        
             smtdir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=only_first_forward)        
-    if model_type=="cnn":
+    if model_type=="origin":
             engine = libct.explore.ExplorationEngine(solver='cvc4', timeout=timeout, safety=safety,
                                             store=formula, verbose=verbose, logfile=logfile,
                                             statsdir=statsdir, smtdir=smtdir,
                                             save_dir=save_dir, input_name=save_exp['input_name'],
                                             module_=module, execute_=execute,
                                             only_first_forward=only_first_forward)
-    elif model_type == "tnn":        
+    elif model_type == "qnn":        
         engine = libct.tnn_explore.ExplorationEngine(solver='cvc4', timeout=timeout, safety=safety,
                                                 store=formula, verbose=verbose, logfile=logfile,
                                                 statsdir=statsdir, smtdir=smtdir,
