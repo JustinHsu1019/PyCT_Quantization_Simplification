@@ -11,7 +11,7 @@ def init_model(model_path,model_type="qnn",delta_factor=0.75):
 	model = keras.models.load_model(model_path)
 	# print(model.summary())
 	layers = [l for l in model.layers if type(l).__name__ not in ['InputLayer','Embedding','Dropout']]
-	if model_type == "cnn":
+	if model_type == "origin":
 		myModel = NNModel()
 	elif model_type == "qnn":
 		myModel = tnnNNModel(delta_factor=delta_factor)
