@@ -4,7 +4,7 @@ from utils.pyct_attack_exp import get_save_dir_from_save_exp
 
 ##### Generate Inputs #####
 
-def pyct_shap_1_to_8(model_name, first_n_img):
+def pyct_shap_1_to_8(model_name,ton_n_shap_list ,first_n_img,model_type='origin',delta_factor=0.75):
     from utils.dataset import MnistDataset
     mnist_dataset = MnistDataset()
         
@@ -19,14 +19,16 @@ def pyct_shap_1_to_8(model_name, first_n_img):
         else:
             s_or_q = "queue"
 
-        for ton_n_shap in [1,2]:
+        for ton_n_shap in ton_n_shap_list:
             
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"mnist_test_{idx}",
-                    "exp_name": f"shap_{ton_n_shap}",
+                    "exp_name": f"cnn_{delta_factor}_shap_{ton_n_shap}",
                     "save_smt": True
                 }
+                if model_type=="origin":
+                    save_exp['exp_name']=f"cnn/shap_{ton_n_shap}"
 
                 save_dir = get_save_dir_from_save_exp(save_exp, model_name, s_or_q, only_first_forward=False)
                 if os.path.exists(save_dir):

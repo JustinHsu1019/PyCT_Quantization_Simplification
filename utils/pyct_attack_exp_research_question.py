@@ -277,7 +277,7 @@ def stock_random_1_2_3_4_8_range02(model_name, first_n_img):
                 
     return inputs
 
-def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="qnn"):
+def imdb_shap_1_2_3_4_8_range02(model_name,ton_n_shap_list ,first_n_img,model_type="qnn",delta_factor=0.75):
     from utils.dataset import IMDB_Dataset
     from utils.gen_random_pixel_location import lstm_imdb_30
     
@@ -295,13 +295,11 @@ def imdb_shap_1_2_3_4_8_range02(model_name, first_n_img,model_type="qnn"):
 
         # for ton_n in [16,32]:
 
-        for ton_n in [1,2,4,8]:
+        for ton_n in ton_n_shap_list:
             for idx in range(first_n_img):
                 save_exp = {
                     "input_name": f"imdb_test_{idx}",
-                    "exp_name": f"limit_0.5_7200_{limit_p}/shap_{ton_n}"
-                    # "only_first_forward":True
-                    # "save_smt": True
+                    "exp_name": f"tnn_{delta_factor}_limit_7200_{limit_p}/shap_{ton_n}"
                 }
                 if model_type=="origin":
                     save_exp['exp_name']=f"lstm_limit_{limit_p}/shap_{ton_n}"
@@ -565,7 +563,7 @@ def sentiment_lstm_lstm_15_1_2_3_4_8_range02(model_name, first_n_img,model_type=
     return inputs
 
 
-def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="qnn",delta_factor=0.75):
+def fashion_mnist_transformer_shap(model_name, ton_n_shap_list,first_n_img,model_type="qnn",delta_factor=0.75):
     from utils.dataset import FashionMnistDataset
     fashion_mnist_dataset = FashionMnistDataset()
         
@@ -580,7 +578,7 @@ def fashion_mnist_transformer_shap(model_name, first_n_img,model_type="qnn",delt
         else:
             s_or_q = "queue"
 
-        for ton_n_shap in [1,2,4,8]:
+        for ton_n_shap in ton_n_shap_list:
             
             for idx in range(first_n_img):
                 save_exp = {

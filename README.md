@@ -95,7 +95,7 @@ Total iterations: 2
 ---
 
 
-## Quantization Testing
+## Simplification Testing
 ```
 ./dnnct_wrapper.py dnn_example/cnn_simple.h5 dnn_example/img.in
 ```
@@ -110,6 +110,7 @@ Available options:
 | `--delta_factor` | Factor for adjusting test sensitivity |  `--delta_factor 0.75` |
 | `--model_type` | Model type, either "origin" or "qnn" | `--model_type qnn` |
 | `--first_n_img` | Number of images to process | `--first_n_img 10` |
+| `--ton_n_shap_list` | List of top n SHAP values | `--ton_n_shap_list "[1,2,4,8,16,32]"` |
 
 ### Detailed Parameter Descriptions
 
@@ -129,11 +130,12 @@ Available options:
 
 - `--first_n_img`: Specifies the number of images to process. This is useful for limiting the scope of testing or for quick preliminary tests.
 
+- `--ton_n_shap_list`: Specifies a list of top n SHAP values to consider. SHAP values help explain the output of machine learning models. This parameter allows you to specify different numbers of top SHAP values to analyze, which can be useful for understanding the most important features influencing the model's decisions at various levels of detail. 
 ### Usage Example
 
 ```bash
 python dnnct_transformer_multi.py --model_name transformer_fashion_mnist
- --num_process 5 --timeout 1000 --delta_factor 0.75 --model_type qnn --first_n_img 10
+ --num_process 5 --timeout 1000 --delta_factor 0.75 --model_type qnn --first_n_img 10 --ton_n_shap_list [1,2,4,8]
 ```
 
 This command will:
@@ -143,13 +145,13 @@ This command will:
 - Set the delta_factor to 0.75
 - Use the Quantized Neural Network (QNNs) mode
 - Process the first 10 images
-
+- Top SHAP values 1,2,4,8
 ## CNN Testing
 
 To run CNN-specific testing with customizable parameters, use the following command:
 
 ```bash
-python dnnct_cnn_multi.py [options]
+python dnnct_cnn_multi.py --first_n_img` 100 --ton_n_shap_list [1,2,3,4,5,6,7,8]
 ```
 
 ### Available Options
@@ -162,13 +164,14 @@ python dnnct_cnn_multi.py [options]
 | `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
 | `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
 | `--first_n_img` | Number of images to process | 1 | `--first_n_img 10` |
+| `--ton_n_shap_list` | List of top n SHAP values | [1,2,4,8]| `--ton_n_shap_list "[1,2,4,8]"` |
 
 ## LSTM Testing
 
 To run LSTM-specific testing with customizable parameters, use the following command:
 
 ```bash
-python dnnct_rnn_multi.py [options]
+python dnnct_rnn_multi.py --first_n_img` 50 
 ```
 
 ### Available Options
@@ -181,13 +184,13 @@ python dnnct_rnn_multi.py [options]
 | `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
 | `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
 | `--first_n_img` | Number of sequences to process | 1 | `--first_n_img 10` |
-
+| `--ton_n_shap_list` | List of top n SHAP values | [1,2,4,8,16,32]| `--ton_n_shap_list "[1,2,4,8,16,32]"` |
 ## Transformer Testing
 
 To run Transformer-specific testing with customizable parameters, use the following command:
 
 ```bash
-python dnnct_transformer_multi.py [options]
+python dnnct_transformer_multi.py --first_n_img 100
 ```
 
 ### Available Options
@@ -200,6 +203,7 @@ python dnnct_transformer_multi.py [options]
 | `--delta_factor` | Factor for adjusting test sensitivity | 0.75 | `--delta_factor 0.5` |
 | `--model_type` | Model type, either "origin" or "qnn" | "qnn" | `--model_type origin` |
 | `--first_n_img` | Number of images/sequences to process | 5 | `--first_n_img 10` |
+| `--ton_n_shap_list` | List of top n SHAP values | [1,2,4,8]| `--ton_n_shap_list "[1,2,4,8]"` |
 
 - `--model_name`: Specifies the name of the Transformer model to test. The default is set to "transformer_fashion_mnist_two_mha", but you can also use other models like "transformer_fashion_mnist". Ensure this matches your saved model file name.
 
@@ -208,6 +212,10 @@ python dnnct_transformer_multi.py [options]
 We conducted preliminary evaluations on CNN and LSTM models to demonstrate the effectiveness of our ternary simplification approach in concolic testing.
 
 ### CNN Model Evaluation
+
+```bash
+python dnnct_cnn_multi.py  --model_name mnist_sep_act_m6_9628 --num_process 5 --timeout 100 --first_n_img 100 --ton_n_shap_list [1,2,3,4,5,6,7,8]
+```
 
 - Dataset: 100 MNIST images
 - Pixels modified: Top 1-8 influential pixels (based on Deep SHAP)
@@ -226,6 +234,10 @@ TNN_delta significantly outperformed both TNN_sign and the original CNN in all m
 
 
 ### LSTM Model Evaluation
+
+```bash
+python dnnct_rnn_multi.py  --model_name imdb_LSTM_08509 --num_process 5 --timeout 7200 --first_n_img 50 --ton_n_shap_list [1,2,4,8,16,32]
+```
 
 - Model: Adapted from TestRnn, featuring an LSTM layer followed by a dense layer for binary classification
 - Dataset: IMDB (movie reviews for sentiment classification)
@@ -252,6 +264,10 @@ LSTM_Δ∗ significantly outperformed the original LSTM, especially in:
 
 ### Transformer Model Evaluation
 
+```bash
+python dnnct_transformer_multi.py  --model_name transformer_fashion_mnist --num_process 5 --timeout 1000 --first_n_img 100 --ton_n_shap_list [1,2,4,8]
+```
+
 - Architecture: Single layer of MultiHeadAttention followed by a Dense layer
 - Dataset: MNIST
 - Pixels modified: Top 1, 2, 4, and 8 highest SHAP values
@@ -272,21 +288,52 @@ Transformer_Δ∗ showed improvements over the original Transformer, particularl
 - Generating more SAT solutions for complex cases (4 and 8 pixels)
 - Producing more adversarial inputs, especially for higher pixel counts
 
-### Enhanced Sparsification Strategy on LSTM
+### Enhanced Sparsification Strategy 
 
-We further evaluated different sparsification levels (2/3Δ∗, Δ∗, 2Δ∗, 3Δ∗, 4Δ∗) on the LSTM model:
+We evaluated different sparsification levels on both LSTM and Transformer models to assess the effectiveness of our ternary simplification approach in enhancing concolic testing capabilities.
+
+#### LSTM Model
+
+We tested the following sparsification levels: 2/3Δ∗, Δ∗, 2Δ∗, 3Δ∗, 4Δ∗
+
+```bash
+python dnnct_rnn_multi.py  --model_name imdb_LSTM_08509 --num_process 5 --timeout 7200 --delta_factor  0.5 or 0.75 or 1.5 or 2.25 or 3 --first_n_img 10 --ton_n_shap_list [1,2,4,8,16,32]
+```
 
 - Samples: 10
 - Sequences modified: Top 1, 2, 4, 8, 16, and 32 highest SHAP values
 - Timeout: 7200 seconds
+- --delta_factor = 0.5, 0.75, 1.5, 2.25, 3
 
 Key findings:
 - Lower Δ∗ values (e.g., 2/3Δ∗) led to more timeouts for high pixel counts
 - Medium values (2Δ∗, 3Δ∗) balanced computational efficiency and constraint-solving capability
-- High values (4Δ∗) resulted in over-simplification, reducing the model's effectiveness
+- High values (4Δ∗) resulted in over-simplification, reducing the model's effectiveness in generating adversarial examples
 
-Optimal pruning intensity was found to be between Δ∗ and 3Δ∗, providing a good balance between computational efficiency and the ability to handle complex data in adversarial settings.
+Optimal pruning intensity for LSTM was found to be between Δ∗ and 3Δ∗, providing a good balance between computational efficiency and the ability to handle complex data in adversarial settings.
 
-These results demonstrate that our ternary simplification approach effectively enhances the capability of concolic testing on various neural network architectures, allowing for more efficient exploration of execution paths and generation of adversarial inputs.
+#### Transformer Model
+
+We tested the following sparsification levels: Original Transformer, Δ∗, 2Δ∗, 3Δ∗
+
+```bash
+python dnnct_transformer_multi.py  --model_name transformer_fashion_mnist_two_mha --num_process 5 --timeout 3600 --delta_factor  0.75 or 1.5 or 2.25 --first_n_img 20 --ton_n_shap_list [1,2,4,8]
+```
+- Samples: 20
+- Sequences modified: Top 1, 2, 4, and 8 highest SHAP values
+- Timeout: 3600 seconds
+- --delta_factor = 0.75, 1.5, 2.25
+
+Key findings:
+- Original Transformer had high timeout rates, especially for high pixel counts
+- Δ∗ reduced timeout rates significantly
+- 2Δ∗ provided optimal balance, eliminating timeouts for low pixel counts while maintaining adversarial output capability
+- 3Δ∗ showed signs of over-simplification, rendering the model ineffective in producing adversarial examples
+
+Optimal pruning intensity for Transformer was found to be between Δ∗ and 2Δ∗, effectively preventing computational timeouts in high-pixel scenarios while maintaining the capability to process complex data.
+
+These results demonstrate that our ternary simplification approach effectively enhances the capability of concolic testing on both LSTM and Transformer architectures, allowing for more efficient exploration of execution paths and generation of adversarial inputs. The optimal pruning intensity varies between model types, emphasizing the importance of tailored simplification strategies for different neural network architectures.
+
+
 
 
