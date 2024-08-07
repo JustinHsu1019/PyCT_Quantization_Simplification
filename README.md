@@ -49,7 +49,7 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 1. Clone our project to the local repository.<br>
-Type `$ git clone git@github.com:alan23273850/PyCT.git` or `$ git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.gitt`<br>
+Type `$ git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.gitt`<br>
 2. Type `$ cd PyCT` and then `$ pipenv shell` for the first time to create a virtual environment.<br>
 3. Type `$ pipenv install` to install required packages for this environment.
 4. Type `$ exit` or `$ deactivate` to leave this virtual environment.
