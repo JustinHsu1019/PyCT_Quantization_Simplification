@@ -26,10 +26,10 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 - [Python](https://www.python.org/downloads/) version == 3.8.5<br>s
-  Basically, it should also work for other versions not lower than 3.8. Simply follow the usual installation instructions for Python.<br>
+  Basically, it should also work for other versions not lower than 3.8, however, strongly suggest that one should install version == [3.8.5] , or conflicts will happen. Simply follow the usual installation instructions for Python.<br>
 
 
-- [CVC4](https://github.com/CVC4/CVC4) commit version == [d1f3225e26b9d64f065048885053392b10994e715](https://github.com/cvc5/cvc5/blob/d1f3225e26b9d64f065048885053392b10994e71/INSTALL.md)<br>
+- [CVC4](https://github.com/CVC4/CVC4) commit version == [d1f3225e26b9d64f065048885053392b10994e71](https://github.com/cvc5/cvc5/blob/d1f3225e26b9d64f065048885053392b10994e71/INSTALL.md)<br>
   Since our CVC4 version has to cope with that of the base project PyExZ3 when we compare the performance of the two, our designated version above cannot be the latest. Otherwise, the CVC4 Python API bindings used in PyExZ3 cannot work.<br>The installation instructions for CVC4 is almost the same as that in the provided link, except that the configuration command should be modified to `./configure.sh --language-bindings=python --python3` for the use of CVC4 Python API bindings. A user must ensure by himself/herself that the command `cvc4` can be found by an operating system shell. Otherwise the tool may not work.<br>
 
 
