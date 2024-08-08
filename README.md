@@ -23,10 +23,10 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 ## Prerequisites
+- [wsl] linux is required to install CVC4, if one use operation system of Windows, use wsl instead, use command `sudo download CVC4` to install CVC4
 
-
-- [Python](https://www.python.org/downloads/) version == 3.8.5<br>s
-  Basically, it should also work for other versions not lower than 3.8, however, strongly suggest that one should install version == [3.8.5] , or conflicts will happen. Simply follow the usual installation instructions for Python.<br>
+- [Python](https://www.python.org/downloads/) version == 3.8.5<br>
+  Basically, it should also work for other versions not lower than 3.8, however, strongly suggest that one should install version 3.8.5 , or conflicts will happen. Simply follow the usual installation instructions for Python.<br>
 
 
 - [CVC4](https://github.com/CVC4/CVC4) commit version == [d1f3225e26b9d64f065048885053392b10994e71](https://github.com/cvc5/cvc5/blob/d1f3225e26b9d64f065048885053392b10994e71/INSTALL.md)<br>
@@ -51,7 +51,7 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 1. Clone our project to the local repository.<br>
 Type `$ git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.gitt`<br>
 2. Type `$ cd PyCT` and then `$ pipenv shell` for the first time to create a virtual environment.<br>
-3. Type `$ pipenv install` to install required packages for this environment.
+3. Type `$ pipenv install -r requirement.txt` to install required packages for this environment.
 4. Type `$ exit` or `$ deactivate` to leave this virtual environment.
 5. For case #46 of the integration test to work, one must repeat step 2. to 4. in the folder `./test/realworld/rpyc` for its own virtual environment first.
 
