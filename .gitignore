@@ -2,3 +2,4 @@ utils/dataset/sent_emb.npy
 __pycache__/
 exp/*
 **/*.log
+.venv*/
