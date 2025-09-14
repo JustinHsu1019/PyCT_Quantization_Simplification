@@ -49,7 +49,7 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 1. Clone our project to the local repository.<br>
-Type `git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.git`<br>
+Type `git clone https://github.com/JustinHsu1019/PyCT_Quantization_Simplification.git PyCT`<br>
 2. Type `cd PyCT` and then `pipenv shell` for the first time to create a virtual environment.<br>
 3. Type `pipenv install -r requirements.txt` to install required packages for this environment.
 4. Type `exit` or `deactivate` to leave this virtual environment.
@@ -65,27 +65,27 @@ Type `git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification
 Keep in mind that always type `pipenv shell` or `source .venv/bin/activate` in this project directory beforehand when starting an experiment, and always type `exit` or `deactivate` after the experiment finishes.
 
 
-For example, to measure the target function `string_find(a, b)` in the target file `./test/strings/string_find.py`, and to let the two initial arguments be `a = ''` and `b = ''`, we can simply type the following command. A user can inspect all options of this script by typing `./pyct.py -h`.
+For example, to measure the target function `string_find(a, b)` in the target file `./examples/strings/string_find.py`, and to let the two initial arguments be `a = ''` and `b = ''`, we can simply type the following command. A user can inspect all options of this script by typing `./pyct.py -h`.
 ```
- ./pyct.py test.strings.string_find "{'a':'','b':''}" -r . -s string_find
+ ./pyct.py examples.strings.string_find "{'a':'','b':''}" -r . -s string_find
 ```
 or
 ```
- ./pyct.py test.strings.string_find "{'a':'','b':''}"
+ ./pyct.py examples.strings.string_find "{'a':'','b':''}"
 ```
 Then the output would be:
 ```
   ct.explore    INFO     Inputs: {'a': '', 'b': ''}
   ct.explore    INFO     Return: 1
-  ct.explore    INFO     Not Covered Yet: /root/PyCT/test/strings/string_find.py [9]
+  ct.explore    INFO     Not Covered Yet: /root/PyCT/examples/strings/string_find.py [9]
   ct.explore    INFO     === Iterations: 1 ===
   ct.explore    INFO     Inputs: {'a': 'ggg', 'b': ''}
   ct.explore    INFO     Return: 1
-  ct.explore    INFO     Not Covered Yet: /root/PyCT/test/strings/string_find.py [9]
+  ct.explore    INFO     Not Covered Yet: /root/PyCT/examples/strings/string_find.py [9]
   ct.explore    INFO     === Iterations: 2 ===
   ct.explore    INFO     Inputs: {'a': 'ADBECggg', 'b': ''}
   ct.explore    INFO     Return: 2
-  ct.explore    INFO     Not Covered Yet: /root/PyCT/test/strings/string_find.py {}
+  ct.explore    INFO     Not Covered Yet: /root/PyCT/examples/strings/string_find.py {}
 
 
 Total iterations: 2
