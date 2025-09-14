@@ -23,7 +23,7 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 ## Prerequisites
-- [wsl] linux is required to install CVC4, if one use operation system of Windows, use wsl instead, use command `sudo download CVC4` to install CVC4
+- [wsl] linux is required to install CVC4, if one use the Windows operating system, use wsl instead, use command `sudo download CVC4` to install CVC4
 
 - [Python](https://www.python.org/downloads/) version == 3.8.5<br>
   Basically, it should also work for other versions not lower than 3.8, however, strongly suggest that one should install version 3.8.5 , or conflicts will happen. Simply follow the usual installation instructions for Python.<br>
@@ -49,10 +49,10 @@ Based on the concept of PyExZ3, we develop a new tool called PyCT to alleviate t
 
 
 1. Clone our project to the local repository.<br>
-Type `$ git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.gitt`<br>
-2. Type `$ cd PyCT` and then `$ pipenv shell` for the first time to create a virtual environment.<br>
-3. Type `$ pipenv install -r requirement.txt` to install required packages for this environment.
-4. Type `$ exit` or `$ deactivate` to leave this virtual environment.
+Type `git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplification.git`<br>
+2. Type `cd PyCT` and then `pipenv shell` for the first time to create a virtual environment.<br>
+3. Type `pipenv install -r requirements.txt` to install required packages for this environment.
+4. Type `exit` or `deactivate` to leave this virtual environment.
 5. For case #46 of the integration test to work, one must repeat step 2. to 4. in the folder `./test/realworld/rpyc` for its own virtual environment first.
 
 
@@ -62,16 +62,16 @@ Type `$ git clone https://github.com/PyCTsimplify/PyCT_Quantization_Simplificati
 ## Usage
 
 
-Keep in mind that always type `$ pipenv shell` or `$ source .venv/bin/activate` in this project directory beforehand when starting an experiment, and always type `$ exit` or `$ deactivate` after the experiment finishes.
+Keep in mind that always type `pipenv shell` or `source .venv/bin/activate` in this project directory beforehand when starting an experiment, and always type `exit` or `deactivate` after the experiment finishes.
 
 
-For example, to measure the target function `string_find(a, b)` in the target file `./test/strings/string_find.py`, and to let the two initial arguments be `a = ''` and `b = ''`, we can simply type the following command. A user can inspect all options of this script by typing `$ ./pyct.py -h`.
+For example, to measure the target function `string_find(a, b)` in the target file `./test/strings/string_find.py`, and to let the two initial arguments be `a = ''` and `b = ''`, we can simply type the following command. A user can inspect all options of this script by typing `./pyct.py -h`.
 ```
- $ ./pyct.py test.strings.string_find "{'a':'','b':''}" -r . -s string_find
+ ./pyct.py test.strings.string_find "{'a':'','b':''}" -r . -s string_find
 ```
 or
 ```
- $ ./pyct.py test.strings.string_find "{'a':'','b':''}"
+ ./pyct.py test.strings.string_find "{'a':'','b':''}"
 ```
 Then the output would be:
 ```
@@ -120,7 +120,7 @@ Available options:
 
 - `--timeout`: Maximum runtime for each individual test. If a test exceeds this time, it will be terminated.
 
-- `--delta_factor`: his parameter adjusts the sensitivity of the test. Lower values make the test more sensitive, potentially finding more edge cases but may increase false positives. Higher values do the opposite. **Important:** This parameter is only effective when `--model_type` is set to "qnn". For "origin" model type, this parameter has no effect.
+- `--delta_factor`: This parameter adjusts the sensitivity of the test. Lower values make the test more sensitive, potentially finding more edge cases but may increase false positives. Higher values do the opposite. **Important:** This parameter is only effective when `--model_type` is set to "qnn". For "origin" model type, this parameter has no effect.
 
 - `--model_type`: This parameter specifies the type of model, which is particularly important for quantization testing:
   - "origin": Indicates the original floating-point model.
